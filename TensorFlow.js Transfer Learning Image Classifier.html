@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<!-- saved from url=(0098)https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#3 -->
+<html class="gr__codelabs_developers_google_com"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  
+  <title>TensorFlow.js Transfer Learning Image Classifier</title>
+  <link rel="stylesheet" href="./TensorFlow.js Transfer Learning Image Classifier_files/css">
+  <link rel="stylesheet" href="./TensorFlow.js Transfer Learning Image Classifier_files/icon">
+  <link rel="stylesheet" href="./TensorFlow.js Transfer Learning Image Classifier_files/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+<script src="./TensorFlow.js Transfer Learning Image Classifier_files/analytics.js.download"></script></head>
+<body data-gr-c-s-loaded="true">
+  <google-codelab-analytics gaid="UA-49880327-14" environment="web" category="null"></google-codelab-analytics>
+  <google-codelab codelab-gaid="" id="tensorflowjs-teachablemachine-codelab" environment="web" feedback-link="https://github.com/tensorflow/tfjs/issues" selected="3" google-codelab-ready="" codelab-title="TensorFlow.js Transfer Learning Image Classifier" anayltics-ready="anayltics-ready"><div id="drawer"><div class="codelab-time-container"><div class="time-remaining" title="Time remaining"><i class="material-icons">access_time</i>40 mins remaining</div></div><div class="steps"><ol><li completed=""><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#0"><span class="step"><span>Introduction</span></span></a></li><li completed=""><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#1"><span class="step"><span>Requirements</span></span></a></li><li completed=""><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#2"><span class="step"><span>Load TensorFlow.js and MobileNet Model</span></span></a></li><li completed="" selected=""><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#3"><span class="step"><span>Set up MobileNet for inference in browser</span></span></a></li><li><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#4"><span class="step"><span>Test MobileNet Inference in Browser</span></span></a></li><li><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#5"><span class="step"><span>Run MobileNet Inference in Browser through Webcam images</span></span></a></li><li><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#6"><span class="step"><span>Add a custom classifier on top of the MobileNet predictions</span></span></a></li><li><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#7"><span class="step"><span>Optional: extending the example</span></span></a></li><li><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#8"><span class="step"><span>What you learned</span></span></a></li></ol></div><div class="metadata"><a target="_blank" href="https://github.com/tensorflow/tfjs/issues"><i class="material-icons">bug_report</i> Report a mistake</a></div></div><div id="codelab-title"><div id="codelab-nav-buttons"><a href="https://codelabs.developers.google.com/" id="arrow-back"><i class="material-icons">close</i></a><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#" id="menu"><i class="material-icons">menu</i></a></div><h1 class="title">TensorFlow.js Transfer Learning Image Classifier</h1><div class="codelab-time-container"><div class="time-remaining" title="Time remaining"><i class="material-icons">access_time</i>40 mins remaining</div></div><devsite-user></devsite-user></div><div id="main"><div id="steps"><google-codelab-step label="Introduction" duration="3" step="1" style="transform: translate3d(-110%, 0px, 0px);"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">1. Introduction</h2>
+        <p>In this codelab, you will learn how to build a simple <a href="https://teachablemachine.withgoogle.com/" target="_blank">"teachable machine"</a>, a custom image classifier that you will train on the fly in the browser using TensorFlow.js, a powerful and flexible machine learning library for Javascript. You will first load and run a popular pre-trained model called MobileNet for image classification in the browser. You will then use a technique called "transfer learning", which bootstraps our training with the pre-trained MobileNet model and customizes it to train for your application. </p>
+<p>This codelab will <strong>not</strong> go over the theory behind the teachable machine application. If you are curious about that, check out <a href="https://beta.observablehq.com/@nsthorat/how-to-build-a-teachable-machine-with-tensorflow-js" target="_blank">this tutorial</a>.</p>
+<h3 class="checklist" is-upgraded="">What you'll learn</h3>
+<ul class="checklist">
+<li>How to load pretrained MobileNet model and make a prediction on new data</li>
+<li>How to make predictions through the webcam</li>
+<li>How to use intermediate activations of MobileNet to do transfer learning on a new set of classes you define on the fly with the webcam</li>
+</ul>
+<p>So let's get started!</p>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Requirements" duration="2" step="2" style="transform: translate3d(-110%, 0px, 0px);"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">2. Requirements</h2>
+        <p>To complete this codelab, you will need:</p>
+<ol type="1" start="1">
+<li>A recent version of <a href="https://www.google.com/chrome/" target="_blank">Chrome</a> or another modern browser.</li>
+<li>A text editor, either running locally on your machine or on the web via something like <a href="https://codepen.io/" target="_blank">Codepen</a> or <a href="https://glitch.com/" target="_blank">Glitch</a>.</li>
+<li>Knowledge of HTML, CSS, JavaScript, and <a href="https://developer.chrome.com/devtools" target="_blank">Chrome DevTools</a> (or your preferred browsers devtools).</li>
+<li>A high-level conceptual understanding of Neural Networks. If you need an introduction or refresher, consider watching <a href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank">this video by 3blue1brown</a> or this <a href="https://www.youtube.com/watch?v=SV-cgdobtTA" target="_blank">video on Deep Learning in Javascript by Ashi Krishnan</a>.</li>
+</ol>
+<aside class="special"><p><strong>Note</strong>: If you are at a CodeLab kiosk we recommend using <a href="https://glitch.com/" target="_blank">glitch.com</a> to complete this codelab. We have set up a <a href="https://glitch.com/~tfjs-glitch-starter" target="_blank">starter project for you to remix</a> that loads tensorflow.js.</p>
+</aside>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Load TensorFlow.js and MobileNet Model" duration="5" step="3" style="transform: translate3d(-110%, 0px, 0px);"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">3. Load TensorFlow.js and MobileNet Model</h2>
+        <p>Open <strong>index.html </strong>in an editor and add this content:</p>
+<pre><code><span class="tag">&lt;html&gt;</span><span class="pln">
+  </span><span class="tag">&lt;head&gt;</span><span class="pln">
+    </span><span class="com">&lt;!-- Load the latest version of TensorFlow.js --&gt;</span><span class="pln">
+    </span><span class="tag">&lt;script</span><span class="pln"> </span><span class="atn">src</span><span class="pun">=</span><span class="atv">"https://unpkg.com/@tensorflow/tfjs"</span><span class="tag">&gt;&lt;/script&gt;</span><span class="pln">
+    </span><span class="tag">&lt;script</span><span class="pln"> </span><span class="atn">src</span><span class="pun">=</span><span class="atv">"https://unpkg.com/@tensorflow-models/mobilenet"</span><span class="tag">&gt;&lt;/script&gt;</span><span class="pln">
+  </span><span class="tag">&lt;/head&gt;</span><span class="pln">
+  </span><span class="tag">&lt;body&gt;</span><span class="pln">
+    </span><span class="tag">&lt;div</span><span class="pln"> </span><span class="atn">id</span><span class="pun">=</span><span class="atv">"console"</span><span class="tag">&gt;&lt;/div&gt;</span><span class="pln">
+    </span><span class="com">&lt;!-- Add an image that we will use to test --&gt;</span><span class="pln">
+    </span><span class="tag">&lt;img</span><span class="pln"> </span><span class="atn">id</span><span class="pun">=</span><span class="atv">"img"</span><span class="pln"> </span><span class="atn">crossOrigin</span><span class="pln"> </span><span class="atn">src</span><span class="pun">=</span><span class="atv">"https://i.imgur.com/JlUvsxa.jpg"</span><span class="pln"> </span><span class="atn">width</span><span class="pun">=</span><span class="atv">227</span><span class="pln"> </span><span class="atn">height</span><span class="pun">=</span><span class="atv">227</span><span class="tag">/&gt;</span><span class="pln">
+    </span><span class="com">&lt;!-- Load index.js after the content of the page --&gt;</span><span class="pln">
+    </span><span class="tag">&lt;script</span><span class="pln"> </span><span class="atn">src</span><span class="pun">=</span><span class="atv">"index.js"</span><span class="tag">&gt;&lt;/script&gt;</span><span class="pln">
+  </span><span class="tag">&lt;/body&gt;</span><span class="pln">
+</span><span class="tag">&lt;/html&gt;</span></code></pre>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Set up MobileNet for inference in browser" duration="5" step="4" style="transform: translate3d(0px, 0px, 0px);" selected=""><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">4. Set up MobileNet for inference in browser</h2>
+        <p>Next, Open/Create file index.js in a code editor, and include the following code:</p>
+<pre><code><span class="kwd">let</span><span class="pln"> net</span><span class="pun">;</span><span class="pln">
+
+async </span><span class="kwd">function</span><span class="pln"> app</span><span class="pun">()</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="str">'Loading mobilenet..'</span><span class="pun">);</span><span class="pln">
+
+  </span><span class="com">// Load the model.</span><span class="pln">
+  net </span><span class="pun">=</span><span class="pln"> await mobilenet</span><span class="pun">.</span><span class="pln">load</span><span class="pun">();</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="str">'Sucessfully loaded model'</span><span class="pun">);</span><span class="pln">
+
+  </span><span class="com">// Make a prediction through the model on our image.</span><span class="pln">
+  </span><span class="kwd">const</span><span class="pln"> imgEl </span><span class="pun">=</span><span class="pln"> document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'img'</span><span class="pun">);</span><span class="pln">
+  </span><span class="kwd">const</span><span class="pln"> result </span><span class="pun">=</span><span class="pln"> await net</span><span class="pun">.</span><span class="pln">classify</span><span class="pun">(</span><span class="pln">imgEl</span><span class="pun">);</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="pln">result</span><span class="pun">);</span><span class="pln">
+</span><span class="pun">}</span><span class="pln">
+
+app</span><span class="pun">();</span></code></pre>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Test MobileNet Inference in Browser" duration="5" step="5"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">5. Test MobileNet Inference in Browser</h2>
+        <p>To run the webpage, simply open <strong>index.html</strong> in a Web Browser. If you are using the cloud console, simply refresh the preview page.</p>
+<p>You should see a picture of a dog and in the Javascript console in Developer Tools, the top predictions of MobileNet! Note that this may take a little bit of time to download the model, be patient!</p>
+<p>Did the image get classified correctly?</p>
+<p>It's also worth noting that this will also work on a mobile phone!</p>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Run MobileNet Inference in Browser through Webcam images" duration="10" step="6"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">6. Run MobileNet Inference in Browser through Webcam images</h2>
+        <p>Now, let's make this more interactive and real-time. Let's set up the webcam to make predictions on images that come through the webcam. </p>
+<p>First set up the webcam video element. Open the <strong>index.html</strong> file, and add the following line inside the &lt;body&gt; section and delete the &lt;img&gt; tag we had for loading the dog image:</p>
+<pre><code><span class="tag">&lt;video</span><span class="pln"> </span><span class="atn">autoplay</span><span class="pln"> </span><span class="atn">playsinline</span><span class="pln"> </span><span class="atn">muted</span><span class="pln"> </span><span class="atn">id</span><span class="pun">=</span><span class="atv">"webcam"</span><span class="pln"> </span><span class="atn">width</span><span class="pun">=</span><span class="atv">"224"</span><span class="pln"> </span><span class="atn">height</span><span class="pun">=</span><span class="atv">"224"</span><span class="tag">&gt;&lt;/video&gt;</span></code></pre>
+<p>Open the <strong>index.js</strong> file and add the webcamElement to the very top of the file</p>
+<pre><code><span class="kwd">const</span><span class="pln"> webcamElement </span><span class="pun">=</span><span class="pln"> document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'webcam'</span><span class="pun">);</span></code></pre>
+<p>In the same <strong>index.js</strong> file, add the webcam setup function before the call to the "app()" function:</p>
+<pre><code><span class="pln">async </span><span class="kwd">function</span><span class="pln"> setupWebcam</span><span class="pun">()</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+  </span><span class="kwd">return</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Promise</span><span class="pun">((</span><span class="pln">resolve</span><span class="pun">,</span><span class="pln"> reject</span><span class="pun">)</span><span class="pln"> </span><span class="pun">=&gt;</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="kwd">const</span><span class="pln"> navigatorAny </span><span class="pun">=</span><span class="pln"> navigator</span><span class="pun">;</span><span class="pln">
+    navigator</span><span class="pun">.</span><span class="pln">getUserMedia </span><span class="pun">=</span><span class="pln"> navigator</span><span class="pun">.</span><span class="pln">getUserMedia </span><span class="pun">||</span><span class="pln">
+        navigatorAny</span><span class="pun">.</span><span class="pln">webkitGetUserMedia </span><span class="pun">||</span><span class="pln"> navigatorAny</span><span class="pun">.</span><span class="pln">mozGetUserMedia </span><span class="pun">||</span><span class="pln">
+        navigatorAny</span><span class="pun">.</span><span class="pln">msGetUserMedia</span><span class="pun">;</span><span class="pln">
+    </span><span class="kwd">if</span><span class="pln"> </span><span class="pun">(</span><span class="pln">navigator</span><span class="pun">.</span><span class="pln">getUserMedia</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+      navigator</span><span class="pun">.</span><span class="pln">getUserMedia</span><span class="pun">({</span><span class="pln">video</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">true</span><span class="pun">},</span><span class="pln">
+        stream </span><span class="pun">=&gt;</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+          webcamElement</span><span class="pun">.</span><span class="pln">srcObject </span><span class="pun">=</span><span class="pln"> stream</span><span class="pun">;</span><span class="pln">
+          webcamElement</span><span class="pun">.</span><span class="pln">addEventListener</span><span class="pun">(</span><span class="str">'loadeddata'</span><span class="pun">,</span><span class="pln">  </span><span class="pun">()</span><span class="pln"> </span><span class="pun">=&gt;</span><span class="pln"> resolve</span><span class="pun">(),</span><span class="pln"> </span><span class="kwd">false</span><span class="pun">);</span><span class="pln">
+        </span><span class="pun">},</span><span class="pln">
+        error </span><span class="pun">=&gt;</span><span class="pln"> reject</span><span class="pun">());</span><span class="pln">
+    </span><span class="pun">}</span><span class="pln"> </span><span class="kwd">else</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+      reject</span><span class="pun">();</span><span class="pln">
+    </span><span class="pun">}</span><span class="pln">
+  </span><span class="pun">});</span><span class="pln">
+</span><span class="pun">}</span></code></pre>
+<p>Now, in the <strong>app()</strong> function which you added before, you can remove the prediction through the image and instead create an infinite loop which makes predictions through the webcam element.</p>
+<pre><code><span class="pln">async </span><span class="kwd">function</span><span class="pln"> app</span><span class="pun">()</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="str">'Loading mobilenet..'</span><span class="pun">);</span><span class="pln">
+
+  </span><span class="com">// Load the model.</span><span class="pln">
+  net </span><span class="pun">=</span><span class="pln"> await mobilenet</span><span class="pun">.</span><span class="pln">load</span><span class="pun">();</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="str">'Sucessfully loaded model'</span><span class="pun">);</span><span class="pln">
+  
+  await setupWebcam</span><span class="pun">();</span><span class="pln">
+  </span><span class="kwd">while</span><span class="pln"> </span><span class="pun">(</span><span class="kwd">true</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="kwd">const</span><span class="pln"> result </span><span class="pun">=</span><span class="pln"> await net</span><span class="pun">.</span><span class="pln">classify</span><span class="pun">(</span><span class="pln">webcamElement</span><span class="pun">);</span><span class="pln">
+
+    document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'console'</span><span class="pun">).</span><span class="pln">innerText </span><span class="pun">=</span><span class="pln"> </span><span class="str">`
+      prediction: ${result[0].className}\n
+      probability: ${result[0].probability}
+    `</span><span class="pun">;</span><span class="pln">
+
+    </span><span class="com">// Give some breathing room by waiting for the next animation frame to</span><span class="pln">
+    </span><span class="com">// fire.</span><span class="pln">
+    await tf</span><span class="pun">.</span><span class="pln">nextFrame</span><span class="pun">();</span><span class="pln">
+  </span><span class="pun">}</span><span class="pln">
+</span><span class="pun">}</span></code></pre>
+<p>If you open your console in the webpage, you should now see a MobileNet prediction with probability for every frame collected on the webcam.</p>
+<p>These may be nonsensical because the ImageNet dataset does not look very much like images that would typically appear in a webcam. One way to test this is by holding a picture of a dog on your phone in front of your laptop camera.</p>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Add a custom classifier on top of the MobileNet predictions" duration="10" step="7"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">7. Add a custom classifier on top of the MobileNet predictions</h2>
+        <p>Now, let's make this more useful. We will make a custom 3-class object classifier using the webcam on the fly. We're going to make a classification through MobileNet, but this time we will take an internal representation (activation) of the model for a particular webcam image and use that for classification.</p>
+<p>We'll use a module called a "K-Nearest Neighbors Classifier", which effectively lets us put webcam images (actually, their MobileNet activations) into different categories (or "classes"), and when the user asks to make a prediction we simply choose the class that has the most similar activation to the one we are making a prediction for.</p>
+<p>Add an import of KNN Classifier to the end of the imports in the &lt;head&gt; tag of <strong>index.html</strong> (you will still need MobileNet, so don't remove that import):</p>
+<pre><code><span class="pun">...</span><span class="pln">
+</span><span class="pun">&lt;</span><span class="pln">script src</span><span class="pun">=</span><span class="str">"https://unpkg.com/@tensorflow-models/knn-classifier"</span><span class="pun">&gt;&lt;/</span><span class="pln">script</span><span class="pun">&gt;</span><span class="pln">
+</span><span class="pun">...</span></code></pre>
+<p>Add 3 buttons for each of the buttons in <strong>index.html </strong>below the video element. These buttons will be used to add training images to the model. </p>
+<pre><code><span class="pun">...</span><span class="pln">
+</span><span class="pun">&lt;</span><span class="pln">button id</span><span class="pun">=</span><span class="str">"class-a"</span><span class="pun">&gt;</span><span class="typ">Add</span><span class="pln"> A</span><span class="pun">&lt;/</span><span class="pln">button</span><span class="pun">&gt;</span><span class="pln">
+</span><span class="pun">&lt;</span><span class="pln">button id</span><span class="pun">=</span><span class="str">"class-b"</span><span class="pun">&gt;</span><span class="typ">Add</span><span class="pln"> B</span><span class="pun">&lt;/</span><span class="pln">button</span><span class="pun">&gt;</span><span class="pln">
+</span><span class="pun">&lt;</span><span class="pln">button id</span><span class="pun">=</span><span class="str">"class-c"</span><span class="pun">&gt;</span><span class="typ">Add</span><span class="pln"> C</span><span class="pun">&lt;/</span><span class="pln">button</span><span class="pun">&gt;</span><span class="pln">
+</span><span class="pun">...</span></code></pre>
+<p>At the top of <strong>index.js</strong>, create the classifier:</p>
+<pre></pre>
+<pre><code><span class="kwd">const</span><span class="pln"> classifier </span><span class="pun">=</span><span class="pln"> knnClassifier</span><span class="pun">.</span><span class="pln">create</span><span class="pun">();</span></code></pre>
+<p>Update the app function:</p>
+<pre><code><span class="pln">async </span><span class="kwd">function</span><span class="pln"> app</span><span class="pun">()</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="str">'Loading mobilenet..'</span><span class="pun">);</span><span class="pln">
+
+  </span><span class="com">// Load the model.</span><span class="pln">
+  net </span><span class="pun">=</span><span class="pln"> await mobilenet</span><span class="pun">.</span><span class="pln">load</span><span class="pun">();</span><span class="pln">
+  console</span><span class="pun">.</span><span class="pln">log</span><span class="pun">(</span><span class="str">'Sucessfully loaded model'</span><span class="pun">);</span><span class="pln">
+
+  await setupWebcam</span><span class="pun">();</span><span class="pln">
+
+  </span><span class="com">// Reads an image from the webcam and associates it with a specific class</span><span class="pln">
+  </span><span class="com">// index.</span><span class="pln">
+  </span><span class="kwd">const</span><span class="pln"> addExample </span><span class="pun">=</span><span class="pln"> classId </span><span class="pun">=&gt;</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="com">// Get the intermediate activation of MobileNet 'conv_preds' and pass that</span><span class="pln">
+    </span><span class="com">// to the KNN classifier.</span><span class="pln">
+    </span><span class="kwd">const</span><span class="pln"> activation </span><span class="pun">=</span><span class="pln"> net</span><span class="pun">.</span><span class="pln">infer</span><span class="pun">(</span><span class="pln">webcamElement</span><span class="pun">,</span><span class="pln"> </span><span class="str">'conv_preds'</span><span class="pun">);</span><span class="pln">
+
+    </span><span class="com">// Pass the intermediate activation to the classifier.</span><span class="pln">
+    classifier</span><span class="pun">.</span><span class="pln">addExample</span><span class="pun">(</span><span class="pln">activation</span><span class="pun">,</span><span class="pln"> classId</span><span class="pun">);</span><span class="pln">
+  </span><span class="pun">};</span><span class="pln">
+
+  </span><span class="com">// When clicking a button, add an example for that class.</span><span class="pln">
+  document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'class-a'</span><span class="pun">).</span><span class="pln">addEventListener</span><span class="pun">(</span><span class="str">'click'</span><span class="pun">,</span><span class="pln"> </span><span class="pun">()</span><span class="pln"> </span><span class="pun">=&gt;</span><span class="pln"> addExample</span><span class="pun">(</span><span class="lit">0</span><span class="pun">));</span><span class="pln">
+  document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'class-b'</span><span class="pun">).</span><span class="pln">addEventListener</span><span class="pun">(</span><span class="str">'click'</span><span class="pun">,</span><span class="pln"> </span><span class="pun">()</span><span class="pln"> </span><span class="pun">=&gt;</span><span class="pln"> addExample</span><span class="pun">(</span><span class="lit">1</span><span class="pun">));</span><span class="pln">
+  document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'class-c'</span><span class="pun">).</span><span class="pln">addEventListener</span><span class="pun">(</span><span class="str">'click'</span><span class="pun">,</span><span class="pln"> </span><span class="pun">()</span><span class="pln"> </span><span class="pun">=&gt;</span><span class="pln"> addExample</span><span class="pun">(</span><span class="lit">2</span><span class="pun">));</span><span class="pln">
+
+  </span><span class="kwd">while</span><span class="pln"> </span><span class="pun">(</span><span class="kwd">true</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+    </span><span class="kwd">if</span><span class="pln"> </span><span class="pun">(</span><span class="pln">classifier</span><span class="pun">.</span><span class="pln">getNumClasses</span><span class="pun">()</span><span class="pln"> </span><span class="pun">&gt;</span><span class="pln"> </span><span class="lit">0</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln">
+      </span><span class="com">// Get the activation from mobilenet from the webcam.</span><span class="pln">
+      </span><span class="kwd">const</span><span class="pln"> activation </span><span class="pun">=</span><span class="pln"> net</span><span class="pun">.</span><span class="pln">infer</span><span class="pun">(</span><span class="pln">webcamElement</span><span class="pun">,</span><span class="pln"> </span><span class="str">'conv_preds'</span><span class="pun">);</span><span class="pln">
+      </span><span class="com">// Get the most likely class and confidences from the classifier module.</span><span class="pln">
+      </span><span class="kwd">const</span><span class="pln"> result </span><span class="pun">=</span><span class="pln"> await classifier</span><span class="pun">.</span><span class="pln">predictClass</span><span class="pun">(</span><span class="pln">activation</span><span class="pun">);</span><span class="pln">
+
+      </span><span class="kwd">const</span><span class="pln"> classes </span><span class="pun">=</span><span class="pln"> </span><span class="pun">[</span><span class="str">'A'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'B'</span><span class="pun">,</span><span class="pln"> </span><span class="str">'C'</span><span class="pun">];</span><span class="pln">
+      document</span><span class="pun">.</span><span class="pln">getElementById</span><span class="pun">(</span><span class="str">'console'</span><span class="pun">).</span><span class="pln">innerText </span><span class="pun">=</span><span class="pln"> </span><span class="str">`
+        prediction: ${classes[result.classIndex]}\n
+        probability: ${result.confidences[result.classIndex]}
+      `</span><span class="pun">;</span><span class="pln">
+    </span><span class="pun">}</span><span class="pln">
+
+    await tf</span><span class="pun">.</span><span class="pln">nextFrame</span><span class="pun">();</span><span class="pln">
+  </span><span class="pun">}</span><span class="pln">
+</span><span class="pun">}</span></code></pre>
+<p>Now when you load the index.html page, you can use common objects or face/body gestures to capture images for each of the three classes. Each time you click one of the "Add" buttons, one image is added to that class as a training example. While you do this, the model continues to make predictions on webcam images coming in and shows the results in real-time. </p>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="Optional: extending the example" duration="5" step="8"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">8. Optional: extending the example</h2>
+        <p>Try now adding another class that represents no action! </p>
+
+
+      </div></div></google-codelab-step><google-codelab-step label="What you learned" duration="5" step="9"><div class="instructions"><div class="inner"><h2 is-upgraded="" class="step-title">9. What you learned</h2>
+        <p>In this codelab, you implemented a simple machine learning web application using TensorFlow.js. You loaded and used a pretrained MobileNet model for classifying images from webcam. You then customized the model to classify images into three custom categories. </p>
+<p>Be sure to visit <a href="https://js.tensorflow.org/" target="_blank">js.tensorflow.org</a> for more examples and demos with code to see how you can use TensorFlow.js in your applications.</p>
+
+
+      </div></div></google-codelab-step></div><div id="controls"><div id="fabs"><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#" id="previous-step" title="Previous step">Back</a><div class="spacer"></div><a href="https://codelabs.developers.google.com/codelabs/tensorflowjs-teachablemachine-codelab/index.html#" id="next-step" title="Next step">Next</a><a href="https://codelabs.developers.google.com/" id="done" hidden="" title="Codelab complete">Done</a></div></div></div></google-codelab>
+
+  <script src="./TensorFlow.js Transfer Learning Image Classifier_files/native-shim.js.download"></script>
+  <script src="./TensorFlow.js Transfer Learning Image Classifier_files/custom-elements.min.js.download"></script>
+  <script src="./TensorFlow.js Transfer Learning Image Classifier_files/prettify.js.download"></script>
+  <script src="./TensorFlow.js Transfer Learning Image Classifier_files/codelab-elements.js.download"></script>
+
+
+
+</body></html>
